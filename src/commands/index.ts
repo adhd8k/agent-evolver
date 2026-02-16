@@ -137,14 +137,14 @@ export async function installSkills(
   console.log('\n✨ Installation complete!');
   console.log(`\n💡 Skills installed to: ${targetSkillsDir}`);
   
-  if (!global) {
+  if (!global && agent) {
     console.log('💡 Skills are project-specific and will be versioned with your repo');
     
-    // Inject skill prompt into AGENTS.md for local installations
+    // Inject skill prompt into agent config file for local installations
     try {
-      await injectSkillPrompt(process.cwd());
+      await injectSkillPrompt(process.cwd(), agent);
     } catch (error) {
-      console.warn('⚠️  Failed to update AGENTS.md:', error);
+      console.warn('⚠️  Failed to update agent config file:', error);
       console.warn('   Skills are installed but you may need to manually document them.');
     }
   }

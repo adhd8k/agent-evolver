@@ -69,23 +69,37 @@ ${END_MARKER}`;
 }
 
 /**
- * Inject or update the skill prompt block in AGENTS.md
+ * Get the target file for skill prompt injection based on agent type
  */
-export async function injectSkillPrompt(projectRoot: string): Promise<void> {
-  const agentsPath = join(projectRoot, '.claude', 'AGENTS.md');
-  const skillPrompt = generateSkillPrompt();
-
-  // Ensure .claude directory exists
-  const claudeDir = join(projectRoot, '.claude');
-  if (!existsSync(claudeDir)) {
-    await mkdir(claudeDir, { recursive: true });
+function getPromptFilePath(projectRoot: string, agent: string): string {
+  switch (agent) {
+    case 'claude-code':
+      // Claude Code uses CLAUDE.md at project root
+      return join(projectRoot, 'CLAUDE.md');
+    case 'cursor':
+      // Cursor uses .cursorrules or similar
+      return join(projectRoot, '.cursorrules');
+    case 'aider':
+      // Aider uses .aider.md
+      return join(projectRoot, '.aider.md');
+    default:
+      // Fallback to generic AGENTS.md
+      return join(projectRoot, 'AGENTS.md');
   }
+}
+
+/**
+ * Inject or update the skill prompt block in the agent's config file
+ */
+export async function injectSkillPrompt(projectRoot: string, agent: string): Promise<void> {
+  const promptPath = getPromptFilePath(projectRoot, agent);
+  const skillPrompt = generateSkillPrompt();
 
   let content: string;
 
-  if (existsSync(agentsPath)) {
+  if (existsSync(promptPath)) {
     // File exists - read and check for existing block
-    content = await readFile(agentsPath, 'utf-8');
+    content = await readFile(promptPath, 'utf-8');
 
     const startIdx = content.indexOf(START_MARKER);
     const endIdx = content.indexOf(END_MARKER);
@@ -100,15 +114,14 @@ export async function injectSkillPrompt(projectRoot: string): Promise<void> {
       content = content.trimEnd() + '\n\n' + skillPrompt + '\n';
     }
   } else {
-    // File doesn't exist - create with header
-    content = `# AGENTS.md
-
-This file provides instructions and context for AI coding agents working on this project.
-
-${skillPrompt}
-`;
+    // File doesn't exist - create with header based on agent
+    const header = agent === 'claude-code' 
+      ? '# CLAUDE.md\n\nProject-specific instructions for Claude Code.\n\n'
+      : '# Agent Instructions\n\nProject-specific instructions for AI coding agents.\n\n';
+    
+    content = header + skillPrompt + '\n';
   }
 
-  await writeFile(agentsPath, content, 'utf-8');
-  console.log(`✅ Updated skill prompt in ${agentsPath}`);
+  await writeFile(promptPath, content, 'utf-8');
+  console.log(`✅ Updated skill prompt in ${promptPath}`);
 }

@@ -418,6 +418,65 @@ Based on analysis of existing systems:
 
 ---
 
+## 📦 Installation
+
+### Quick Start
+
+```bash
+# Install agent-evolver globally
+npm install -g agent-evolver
+
+# Navigate to your project
+cd my-project
+
+# Install skills locally (default: current directory)
+agent-evolver install
+
+# Or install globally to agent directory
+agent-evolver install --global
+```
+
+### Usage
+
+```bash
+# Install all skills locally (project-specific)
+agent-evolver install
+
+# Install specific skill locally
+agent-evolver install -s record-architectural-decision
+
+# Install globally to agent directory
+agent-evolver install --global
+
+# Force specific agent (auto-detect by default)
+agent-evolver install -a claude-code
+
+# List available skills
+agent-evolver list
+
+# Detect installed agents
+agent-evolver detect
+```
+
+### Local vs Global Installation
+
+**Local (default):** `agent-evolver install`
+- Skills install to `./.agent-evolver/skills/` in your current directory
+- ✅ Perfect for project-specific skills
+- ✅ Version controlled with your repo
+- ✅ Different projects can have different skills
+- ✅ Team collaboration (skills tracked in git)
+
+**Global:** `agent-evolver install --global`
+- Skills install to agent directory (e.g., `~/.claude/skills/`)
+- ✅ Available across all projects
+- ❌ Not version controlled
+- ❌ Single skill set for all projects
+
+**Recommendation:** Use local installation for most cases. Use global only for truly universal skills (like "explain code" or "write tests").
+
+---
+
 ## 🤝 Contributing
 
 This is an experimental project exploring self-evolving AI coding agents. Contributions welcome!

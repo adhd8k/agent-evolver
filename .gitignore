@@ -36,5 +36,5 @@ build/
 *.js.map
 *.d.ts
 
-# Runtime
+# Runtime (exclude from agent-evolver repo, but users' projects should version control .agent-evolver/skills/)
 .agent-evolver/

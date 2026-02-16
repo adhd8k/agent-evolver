@@ -95,18 +95,25 @@ Optional template files referenced by the skill. Use variable substitution:
 ## Installation
 
 ```bash
-# Install all skills for detected agent
+# Install all skills locally (default: current directory)
 agent-evolver install
 
-# Install specific skill
+# Install specific skill locally
 agent-evolver install -s record-architectural-decision
 
-# Force specific agent
+# Install globally to agent directory
+agent-evolver install --global
+
+# Force specific agent (auto-detect by default)
 agent-evolver install -a claude-code
 
 # List available skills
 agent-evolver list
 ```
+
+**Local vs Global:**
+- **Local (default):** `./.agent-evolver/skills/` - Project-specific, version controlled
+- **Global (`--global`):** `~/.claude/skills/` - Available across all projects
 
 ## Adding New Skills
 

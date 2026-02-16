@@ -13,9 +13,10 @@ program
 
 program
   .command('install')
-  .description('Install skills for detected coding agent')
+  .description('Install skills (default: current directory, --global for agent directory)')
   .option('-a, --agent <type>', 'Force specific agent (claude-code, cursor, aider)')
   .option('-s, --skill <name>', 'Install specific skill (default: all)')
+  .option('-g, --global', 'Install globally to agent directory (default: current directory)')
   .action(async (options) => {
     try {
       const agent = options.agent || (await detectAgent());
@@ -26,7 +27,7 @@ program
       }
 
       console.log(`✅ Detected agent: ${agent}`);
-      await installSkills(agent, options.skill);
+      await installSkills(agent, options.skill, options.global);
     } catch (error) {
       console.error('❌ Installation failed:', error);
       process.exit(1);

@@ -52,14 +52,32 @@ async function loadSkill(skillName: string): Promise<UniversalSkill> {
 }
 
 /**
+ * Get the target directory for skill installation
+ */
+function getTargetSkillsDir(agent: AgentType, global: boolean): string {
+  if (global) {
+    // Global installation: agent-specific directory
+    return getAgentSkillsDir(agent);
+  } else {
+    // Local installation: current directory
+    return join(process.cwd(), '.agent-evolver', 'skills');
+  }
+}
+
+/**
  * Install skills for a specific agent
  */
-export async function installSkills(agent: AgentType, specificSkill?: string): Promise<void> {
+export async function installSkills(
+  agent: AgentType,
+  specificSkill?: string,
+  global: boolean = false
+): Promise<void> {
   const skillsSourceDir = getSkillsSourceDir();
-  const agentSkillsDir = getAgentSkillsDir(agent);
+  const targetSkillsDir = getTargetSkillsDir(agent, global);
   const adapter = getAdapter(agent);
 
-  console.log(`📦 Installing skills to: ${agentSkillsDir}`);
+  const scope = global ? 'globally' : 'locally';
+  console.log(`📦 Installing skills ${scope} to: ${targetSkillsDir}`);
 
   // Get list of skills to install
   const skillsToInstall = specificSkill
@@ -70,7 +88,7 @@ export async function installSkills(agent: AgentType, specificSkill?: string): P
   for (const skillName of skillsToInstall) {
     try {
       const skill = await loadSkill(skillName);
-      const targetDir = join(agentSkillsDir, skillName);
+      const targetDir = join(targetSkillsDir, skillName);
       
       console.log(`📝 Installing: ${skill.name} v${skill.version}`);
       await adapter.convert(skill, targetDir);
@@ -80,7 +98,11 @@ export async function installSkills(agent: AgentType, specificSkill?: string): P
   }
 
   console.log('\n✨ Installation complete!');
-  console.log(`\n💡 Skills installed to: ${agentSkillsDir}`);
+  console.log(`\n💡 Skills installed to: ${targetSkillsDir}`);
+  
+  if (!global) {
+    console.log('💡 Skills are project-specific and will be versioned with your repo');
+  }
   
   if (agent === 'claude-code') {
     console.log('\n🔄 Restart Claude Code to load new skills');

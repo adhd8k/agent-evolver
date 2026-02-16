@@ -461,7 +461,7 @@ agent-evolver detect
 ### Local vs Global Installation
 
 **Local (default):** `agent-evolver install`
-- Skills install to `./.agent-evolver/skills/` in your current directory
+- Skills install to `./.claude/skills/` (if Claude detected) or `./.agents/skills/` (fallback)
 - ✅ Perfect for project-specific skills
 - ✅ Version controlled with your repo
 - ✅ Different projects can have different skills

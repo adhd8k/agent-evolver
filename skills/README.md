@@ -112,7 +112,7 @@ agent-evolver list
 ```
 
 **Local vs Global:**
-- **Local (default):** `./.agent-evolver/skills/` - Project-specific, version controlled
+- **Local (default):** `./.claude/skills/` (Claude) or `./.agents/skills/` (fallback) - Project-specific, version controlled
 - **Global (`--global`):** `~/.claude/skills/` - Available across all projects
 
 ## Adding New Skills

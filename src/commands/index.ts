@@ -1,4 +1,4 @@
-import { readdir, readFile } from 'fs/promises';
+import { readdir, readFile, stat } from 'fs/promises';
 import { join } from 'path';
 import { parse as parseYaml } from 'yaml';
 import { AgentType, getAgentSkillsDir } from '../detectors';
@@ -10,6 +10,25 @@ import { getAdapter, UniversalSkill } from '../adapters';
 function getSkillsSourceDir(): string {
   // Skills are bundled with agent-evolver
   return join(__dirname, '..', '..', 'skills');
+}
+
+/**
+ * Check if a directory is a valid skill directory
+ */
+async function isValidSkill(skillPath: string): Promise<boolean> {
+  try {
+    const stats = await stat(skillPath);
+    if (!stats.isDirectory()) {
+      return false;
+    }
+    
+    // Check if skill.yaml exists
+    const metadataPath = join(skillPath, 'skill.yaml');
+    await stat(metadataPath);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -60,7 +79,9 @@ function getTargetSkillsDir(agent: AgentType, global: boolean): string {
     return getAgentSkillsDir(agent);
   } else {
     // Local installation: current directory
-    return join(process.cwd(), '.agent-evolver', 'skills');
+    // Use agent-specific directory if detected, fallback to .agents
+    const agentDir = agent === 'claude-code' ? '.claude' : '.agents';
+    return join(process.cwd(), agentDir, 'skills');
   }
 }
 
@@ -80,9 +101,24 @@ export async function installSkills(
   console.log(`📦 Installing skills ${scope} to: ${targetSkillsDir}`);
 
   // Get list of skills to install
-  const skillsToInstall = specificSkill
-    ? [specificSkill]
-    : await readdir(skillsSourceDir);
+  let skillsToInstall: string[];
+  if (specificSkill) {
+    skillsToInstall = [specificSkill];
+  } else {
+    // Read all entries in skills directory
+    const entries = await readdir(skillsSourceDir);
+    
+    // Filter to only valid skill directories
+    const validSkills = await Promise.all(
+      entries.map(async (entry) => {
+        const skillPath = join(skillsSourceDir, entry);
+        const isValid = await isValidSkill(skillPath);
+        return isValid ? entry : null;
+      })
+    );
+    
+    skillsToInstall = validSkills.filter((skill): skill is string => skill !== null);
+  }
 
   // Install each skill
   for (const skillName of skillsToInstall) {

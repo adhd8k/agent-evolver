@@ -1,0 +1,20 @@
+name: update-skill
+version: 1.0.0
+description: Modify existing agent skills based on learned patterns, mistakes, and new knowledge
+author: adhd8k
+agentCompatibility:
+  - claude-code
+  - cursor
+  - aider
+  - openclaw
+triggers:
+  - pattern: "I should remember"
+  - pattern: "this skill should mention"
+  - pattern: "update the documentation"
+  - pattern: "learned that"
+variables:
+  skillsDir: "{{agentSkillsDir}}"
+  changesLog: "{{projectRoot}}/.agent-evolver/skill-changes.log"
+files:
+  - path: "SKILL.md"
+    type: "instructions"

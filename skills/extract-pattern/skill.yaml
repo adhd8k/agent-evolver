@@ -1,0 +1,22 @@
+name: extract-pattern
+version: 1.0.0
+description: Identify recurring patterns in code, problems, or solutions and document them for reuse
+author: adhd8k
+agentCompatibility:
+  - claude-code
+  - cursor
+  - aider
+  - openclaw
+triggers:
+  - pattern: "I've done this before"
+  - pattern: "similar to how we"
+  - pattern: "same pattern as"
+  - pattern: "recurring issue"
+variables:
+  patternsDir: "{{projectRoot}}/docs/patterns"
+  template: "templates/pattern.md"
+files:
+  - path: "SKILL.md"
+    type: "instructions"
+  - path: "templates/pattern.md"
+    type: "template"

@@ -1,0 +1,21 @@
+name: record-architectural-decision
+version: 1.0.0
+description: Record significant architectural decisions, design choices, and their rationale
+author: adhd8k
+agentCompatibility:
+  - claude-code
+  - cursor
+  - aider
+  - openclaw
+triggers:
+  - pattern: "architectural decision"
+  - pattern: "design choice"
+  - pattern: "why did we choose"
+variables:
+  docsDir: "{{projectRoot}}/docs/decisions"
+  template: "templates/decision.md"
+files:
+  - path: "SKILL.md"
+    type: "instructions"
+  - path: "templates/decision.md"
+    type: "template"

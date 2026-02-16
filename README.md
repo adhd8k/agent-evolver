@@ -475,6 +475,33 @@ agent-evolver detect
 
 **Recommendation:** Use local installation for most cases. Use global only for truly universal skills (like "explain code" or "write tests").
 
+### Automatic AGENTS.md Injection
+
+When you install skills locally, agent-evolver automatically updates (or creates) `.claude/AGENTS.md` with a managed block that:
+
+**✅ Describes installed skills** - What they do and when to use them
+**✅ Explains the core loop** - Record → Extract → Update → Surface
+**✅ Provides usage guidelines** - Always/When learning/Never patterns
+**✅ Auto-updates** - Subsequent installs update the block (no duplication)
+
+**The injected block:**
+```markdown
+###AGENT-EVOLVER-START###
+## Agent Evolver Skills
+
+You have access to self-evolving skills...
+[skill descriptions and usage guidelines]
+###AGENT-EVOLVER-END###
+```
+
+**Benefits:**
+- Agent knows about skills without manual documentation
+- Skills are part of the agent's system prompt
+- Updates propagate automatically when you update agent-evolver
+- Manual edits outside the markers are preserved
+
+**Manual edits:** The block between `###AGENT-EVOLVER-START###` and `###AGENT-EVOLVER-END###` is managed by agent-evolver. Edit content outside these markers freely - it won't be touched.
+
 ---
 
 ## 🤝 Contributing

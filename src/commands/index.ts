@@ -3,6 +3,7 @@ import { join } from 'path';
 import { parse as parseYaml } from 'yaml';
 import { AgentType, getAgentSkillsDir } from '../detectors';
 import { getAdapter, UniversalSkill } from '../adapters';
+import { injectSkillPrompt } from '../injectors';
 
 /**
  * Get the skills directory (where universal skills are stored)
@@ -138,6 +139,14 @@ export async function installSkills(
   
   if (!global) {
     console.log('💡 Skills are project-specific and will be versioned with your repo');
+    
+    // Inject skill prompt into AGENTS.md for local installations
+    try {
+      await injectSkillPrompt(process.cwd());
+    } catch (error) {
+      console.warn('⚠️  Failed to update AGENTS.md:', error);
+      console.warn('   Skills are installed but you may need to manually document them.');
+    }
   }
   
   if (agent === 'claude-code') {

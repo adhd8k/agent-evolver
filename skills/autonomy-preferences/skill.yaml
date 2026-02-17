@@ -1,0 +1,30 @@
+name: autonomy-preferences
+version: 0.1.0
+description: Determine how autonomous the agent should be for architectural, design, technical, and process decisions
+author: adhd8k
+agentCompatibility:
+  - claude-code
+  - cursor
+  - aider
+  - openclaw
+triggers:
+  # Phrase-based: user explicitly mentions autonomy settings
+  - pattern: "set autonomy"
+  - pattern: "autonomy preferences"
+  - pattern: "decision preferences"
+  - pattern: "just decide"
+  - pattern: "don't ask me"
+  - pattern: "always ask"
+  - pattern: "you can choose"
+  # Action-based: agent is about to ask for approval
+  - action: "About to ask user for approval on an architectural or design decision"
+  - action: "Unsure whether to ask user or proceed autonomously"
+  - action: "No autonomy preferences file exists yet"
+completion_check: "Did I check autonomy preferences before asking for user approval?"
+variables:
+  preferencesFile: "{{projectRoot}}/.agent-evolver/autonomy-preferences.yaml"
+files:
+  - path: "SKILL.md"
+    type: "instructions"
+  - path: "templates/preferences-seed.yaml"
+    type: "template"

@@ -151,6 +151,11 @@ Run these internal checks at each stage — no user prompt needed:
 - If a prior pattern applies → use it without being asked
 - If a blocking gap applies → surface it before writing code
 
+**Before asking user for approval:**
+- Check \`.agent-evolver/autonomy-preferences.yaml\` for user's preferred autonomy level
+- If no preferences exist → run \`autonomy-preferences\` onboarding first
+- Respect the mode: \`ask\` = wait for approval, \`suggest-then-proceed\` = state and continue, \`autonomous\` = just do it
+
 **Before writing code:**
 - Am I choosing between approaches? → \`record-architectural-decision\`
 - Am I implementing something with no prior example in this codebase? → \`surface-gap\`

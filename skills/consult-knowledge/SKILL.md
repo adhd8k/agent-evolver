@@ -50,7 +50,17 @@ Read the knowledge gaps file if it exists. Identify any gaps that:
 
 Flag unresolved blocking gaps before proceeding.
 
-### 5. Produce a Context Summary
+### 5. Check Autonomy Preferences (`.agent-evolver/autonomy-preferences.yaml`)
+
+Read the autonomy preferences file if it exists. This tells you how the user wants you to behave when making decisions:
+
+- **ask** → Ask for approval before architectural/design/technical decisions
+- **suggest-then-proceed** → State your decision and proceed without waiting
+- **autonomous** → Make reasonable decisions without asking
+
+If the file doesn't exist, you should run the `autonomy-preferences` skill to onboard the user.
+
+### 6. Produce a Context Summary
 
 Using the template below, summarize what you found. Be concise — this is an internal planning artifact, not a user-facing document.
 

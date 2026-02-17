@@ -31,6 +31,15 @@
 
 ---
 
+## Autonomy Context
+
+<!-- From .agent-evolver/autonomy-preferences.yaml -->
+<!-- Format: default_mode + any category-specific overrides -->
+
+- No preferences set (run autonomy-preferences onboarding)
+
+---
+
 ## How This Shapes My Plan
 
 <!-- 1–3 sentences: what will you do differently or the same because of the above? -->

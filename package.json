@@ -6,9 +6,19 @@
   "bin": {
     "agent-evolver": "dist/cli.js"
   },
+  "files": [
+    "dist",
+    "skills",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
+    "prepublishOnly": "npm run build",
     "test": "jest",
     "lint": "eslint src --ext .ts",
     "format": "prettier --write 'src/**/*.ts'"
@@ -20,10 +30,21 @@
     "automation",
     "claude",
     "cursor",
-    "skills"
+    "codex",
+    "skills",
+    "self-evolving",
+    "agentic"
   ],
   "author": "adhd8k",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adhd8k/agent-evolver.git"
+  },
+  "homepage": "https://github.com/adhd8k/agent-evolver#readme",
+  "bugs": {
+    "url": "https://github.com/adhd8k/agent-evolver/issues"
+  },
   "devDependencies": {
     "@types/node": "^20.11.0",
     "@types/jest": "^29.5.0",

@@ -418,6 +418,99 @@ Based on analysis of existing systems:
 
 ---
 
+## 📦 Installation
+
+### Quick Start
+
+```bash
+# Install agent-evolver globally
+npm install -g agent-evolver
+
+# Navigate to your project
+cd my-project
+
+# Install skills locally (default: current directory)
+agent-evolver install
+
+# Or install globally to agent directory
+agent-evolver install --global
+```
+
+### Usage
+
+```bash
+# Install all skills locally (project-specific)
+agent-evolver install
+
+# Install specific skill locally
+agent-evolver install -s record-architectural-decision
+
+# Install globally to agent directory
+agent-evolver install --global
+
+# Force specific agent (auto-detect by default)
+agent-evolver install -a claude-code
+
+# List available skills
+agent-evolver list
+
+# Detect installed agents
+agent-evolver detect
+```
+
+### Local vs Global Installation
+
+**Local (default):** `agent-evolver install`
+- Skills install to `./.claude/skills/` (if Claude detected) or `./.agents/skills/` (fallback)
+- ✅ Perfect for project-specific skills
+- ✅ Version controlled with your repo
+- ✅ Different projects can have different skills
+- ✅ Team collaboration (skills tracked in git)
+
+**Global:** `agent-evolver install --global`
+- Skills install to agent directory (e.g., `~/.claude/skills/`)
+- ✅ Available across all projects
+- ❌ Not version controlled
+- ❌ Single skill set for all projects
+
+**Recommendation:** Use local installation for most cases. Use global only for truly universal skills (like "explain code" or "write tests").
+
+### Automatic Config File Injection
+
+When you install skills locally, agent-evolver automatically updates (or creates) the agent's config file with a managed block:
+
+**Agent-specific files:**
+- **Claude Code:** `CLAUDE.md` (project root)
+- **Cursor:** `.cursorrules` (project root)
+- **Aider:** `.aider.md` (project root)
+
+**What gets injected:**
+**✅ Describes installed skills** - What they do and when to use them
+**✅ Explains the core loop** - Record → Extract → Update → Surface
+**✅ Provides usage guidelines** - Always/When learning/Never patterns
+**✅ Auto-updates** - Subsequent installs update the block (no duplication)
+
+**The injected block:**
+```markdown
+###AGENT-EVOLVER-START###
+## Agent Evolver Skills
+
+You have access to self-evolving skills...
+[skill descriptions and usage guidelines]
+###AGENT-EVOLVER-END###
+```
+
+**Benefits:**
+- Agent knows about skills without manual documentation
+- Skills are part of the agent's system prompt
+- Updates propagate automatically when you update agent-evolver
+- Manual edits outside the markers are preserved
+- Files are in standard locations (CLAUDE.md, .cursorrules, etc.)
+
+**Manual edits:** The block between `###AGENT-EVOLVER-START###` and `###AGENT-EVOLVER-END###` is managed by agent-evolver. Edit content outside these markers freely - it won't be touched.
+
+---
+
 ## 🤝 Contributing
 
 This is an experimental project exploring self-evolving AI coding agents. Contributions welcome!

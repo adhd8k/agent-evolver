@@ -1,0 +1,42 @@
+{
+  "name": "agent-evolver",
+  "version": "0.1.0",
+  "description": "Self-evolving agentic coding system - agents that learn project patterns and update their own skills",
+  "main": "dist/index.js",
+  "bin": {
+    "agent-evolver": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "format": "prettier --write 'src/**/*.ts'"
+  },
+  "keywords": [
+    "ai",
+    "agents",
+    "coding",
+    "automation",
+    "claude",
+    "cursor",
+    "skills"
+  ],
+  "author": "adhd8k",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/jest": "^29.5.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "jest": "^29.5.0",
+    "prettier": "^3.0.0",
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.3.0"
+  },
+  "dependencies": {
+    "commander": "^11.1.0",
+    "yaml": "^2.3.4"
+  }
+}

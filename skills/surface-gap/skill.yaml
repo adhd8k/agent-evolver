@@ -1,0 +1,26 @@
+name: surface-gap
+version: 1.1.0
+description: Identify missing knowledge, unclear instructions, or situations where existing skills don't provide guidance
+author: adhd8k
+agentCompatibility:
+  - claude-code
+  - cursor
+  - aider
+  - openclaw
+triggers:
+  # Phrase-based: user says these things
+  - pattern: "I'm not sure how to"
+  - pattern: "no skill covers"
+  - pattern: "unclear what"
+  - pattern: "need guidance on"
+  # Action-based: Claude is doing these things (even silently)
+  - action: "About to implement something with no prior examples in this codebase"
+  - action: "Making an assumption about undocumented or ambiguous behavior"
+  - action: "Encountering an error with no clear or obvious fix"
+  - action: "Guessing at the intended design because requirements are unclear"
+completion_check: "Am I about to guess or proceed without clear guidance?"
+variables:
+  gapsLog: "{{projectRoot}}/.agent-evolver/knowledge-gaps.md"
+files:
+  - path: "SKILL.md"
+    type: "instructions"

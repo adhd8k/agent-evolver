@@ -1,0 +1,30 @@
+name: record-architectural-decision
+version: 1.1.0
+description: Record significant architectural decisions, design choices, and their rationale
+author: adhd8k
+agentCompatibility:
+  - claude-code
+  - cursor
+  - aider
+  - openclaw
+triggers:
+  # Phrase-based: user says these things
+  - pattern: "architectural decision"
+  - pattern: "design choice"
+  - pattern: "why did we choose"
+  # Action-based: Claude is doing these things (even silently)
+  - action: "Adding a new class, module, or entity type"
+  - action: "Choosing between two or more implementation approaches"
+  - action: "Selecting a library, package, or tool"
+  - action: "Deciding how to structure or model data"
+  - action: "Implementing a new subsystem, pipeline, or integration"
+  - action: "Changing the interface or contract of an existing component"
+completion_check: "Did I make any design choices worth documenting? (even silent ones)"
+variables:
+  docsDir: "{{projectRoot}}/docs/decisions"
+  template: "templates/decision.md"
+files:
+  - path: "SKILL.md"
+    type: "instructions"
+  - path: "templates/decision.md"
+    type: "template"

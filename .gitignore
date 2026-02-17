@@ -28,3 +28,14 @@ Thumbs.db
 # Project specific
 .agent/  # This will be generated per-project
 *.backup
+
+# Build output
+dist/
+build/
+*.js
+*.js.map
+*.d.ts
+
+# Runtime (exclude from agent-evolver repo, but users' projects should version control .claude/skills/ or .agents/skills/)
+.claude/
+.agents/

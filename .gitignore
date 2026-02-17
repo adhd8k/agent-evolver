@@ -33,6 +33,7 @@ Thumbs.db
 dist/
 build/
 *.js
+!jest.config.js
 *.js.map
 *.d.ts
 

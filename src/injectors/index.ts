@@ -1,70 +1,117 @@
-import { readFile, writeFile, mkdir } from 'fs/promises';
+import { readdir, readFile, writeFile } from 'fs/promises';
 import { join } from 'path';
 import { existsSync } from 'fs';
+import { parse as parseYaml } from 'yaml';
 
 const START_MARKER = '###AGENT-EVOLVER-START###';
 const END_MARKER = '###AGENT-EVOLVER-END###';
 
+export interface SkillTrigger {
+  pattern: string;
+}
+
+export interface InstalledSkill {
+  name: string;
+  description: string;
+  triggers: SkillTrigger[];
+}
+
 /**
- * Generate the skill system prompt block
+ * Get the installed skills directory path for a given agent
  */
-function generateSkillPrompt(): string {
+function getInstalledSkillsDir(projectRoot: string, agent: string): string {
+  const agentDir = agent === 'claude-code' ? '.claude' : '.agents';
+  return join(projectRoot, agentDir, 'skills');
+}
+
+/**
+ * Read installed skills from disk, returning their metadata and triggers
+ */
+async function readInstalledSkills(skillsDir: string): Promise<InstalledSkill[]> {
+  if (!existsSync(skillsDir)) {
+    return [];
+  }
+
+  const skills: InstalledSkill[] = [];
+
+  try {
+    const entries = await readdir(skillsDir);
+
+    for (const entry of entries) {
+      const metadataPath = join(skillsDir, entry, 'skill.yaml');
+      if (!existsSync(metadataPath)) continue;
+
+      try {
+        const content = await readFile(metadataPath, 'utf-8');
+        const metadata = parseYaml(content);
+
+        skills.push({
+          name: metadata.name || entry,
+          description: metadata.description || '',
+          triggers: Array.isArray(metadata.triggers) ? metadata.triggers : [],
+        });
+      } catch {
+        // Skip malformed skill.yaml files
+      }
+    }
+  } catch {
+    // Skills dir unreadable
+  }
+
+  return skills;
+}
+
+/**
+ * Generate the skill system prompt block dynamically from installed skills.
+ * Uses imperative language so Claude auto-triggers skills without being asked.
+ */
+function generateSkillPrompt(skills: InstalledSkill[], agentSkillsDir: string): string {
+  const skillBlocks =
+    skills.length === 0
+      ? '_No skills installed yet. Run `agent-evolver install` to add skills._'
+      : skills
+          .map((skill) => {
+            const triggerLines =
+              skill.triggers.length > 0
+                ? skill.triggers.map((t) => `  - "${t.pattern}"`).join('\n')
+                : '  - _(no triggers defined — invoke manually)_';
+
+            return `#### \`${skill.name}\`
+> ${skill.description}
+
+**Auto-trigger when you detect ANY of:**
+${triggerLines}
+
+**How to invoke:** Read \`${agentSkillsDir}/${skill.name}/SKILL.md\` and follow its instructions immediately.`;
+          })
+          .join('\n\n---\n\n');
+
   return `${START_MARKER}
-## Agent Evolver Skills
+## Agent Evolver — Skill Auto-Trigger Rules
 
-You have access to self-evolving skills that improve over time:
+⚡ **MANDATORY BEHAVIOR**: When you detect ANY trigger pattern listed below, you MUST automatically invoke the corresponding skill — do NOT wait for the user to ask.
 
-### 🎯 Core Loop
-1. **Record decisions** → Document architectural choices with rationale
-2. **Extract patterns** → Identify recurring solutions from your work
-3. **Update skills** → Modify skill instructions based on experience
-4. **Surface gaps** → Make uncertainty visible when skills don't provide guidance
-
-### 📚 Available Skills
-
-**record-architectural-decision**
-- Capture significant architectural decisions in \`docs/decisions/YYYY-MM-DD-title.md\`
-- Use when: Making design choices, choosing between approaches, establishing patterns
-- Template includes: Context, Decision, Alternatives, Rationale, Consequences
-
-**extract-pattern**
-- Identify recurring patterns in \`docs/patterns/[category]/[pattern-name].md\`
-- Use when: Solving familiar problems, noticing similar code structures
-- Tracks confidence levels (Low → Medium → High based on instances)
-
-**update-skill**
-- Modify skill instructions when you discover better approaches
-- Use when: Skills are incomplete, you made a preventable mistake, learned project-specific patterns
-- Logs changes to \`.agent-evolver/skill-changes.log\`
-
-**surface-gap**
-- Document missing knowledge in \`.agent-evolver/knowledge-gaps.md\`
-- Use when: Uncertain how to proceed, no skill covers the situation, about to guess
-- Categorize by severity: Blocking, Slowing, Minor
-
-### ⚡ When to Use
-
-**Always:**
-- Record significant architectural decisions (don't rely on memory)
-- Extract patterns after 2-3 similar implementations
-- Surface gaps when uncertain (better than guessing)
-
-**When learning:**
-- Update skills after discovering better approaches
-- Add examples to skills when abstract instructions weren't clear
-- Document anti-patterns after making mistakes
-
-**Never:**
-- Don't update skills for one-off project-specific quirks
-- Don't record trivial decisions (what library version, etc.)
-- Don't extract patterns from single instances
-
-### 📖 Skill Files
-
-Skills are in \`.claude/skills/[skill-name]/SKILL.md\`. Read them for full instructions and examples.
+This is not optional. These skills exist to capture knowledge, prevent repeated mistakes, and improve over time. Invoke them proactively.
 
 ---
-**Note:** This section is managed by agent-evolver. Manual edits may be overwritten on update.
+
+${skillBlocks}
+
+---
+
+### General Rules
+
+- **Architectural decisions**: ANY time you choose between approaches, record it — even if the user didn't ask
+- **Recurring patterns**: After solving a problem the 2nd time, extract the pattern
+- **Uncertainty**: When you're about to guess or you lack guidance, surface the gap first
+- **Mistakes**: When you catch a mistake, update the relevant skill with the lesson
+
+### Updating Skills
+
+Skills improve over time. If a skill's instructions are incomplete or wrong for this project, use the \`update-skill\` skill to fix it. Skills are living documents — your edits are encouraged.
+
+---
+*This section is managed by agent-evolver. Re-running \`agent-evolver install\` updates this block.*
 ${END_MARKER}`;
 }
 
@@ -74,54 +121,68 @@ ${END_MARKER}`;
 function getPromptFilePath(projectRoot: string, agent: string): string {
   switch (agent) {
     case 'claude-code':
-      // Claude Code uses CLAUDE.md at project root
       return join(projectRoot, 'CLAUDE.md');
     case 'cursor':
-      // Cursor uses .cursorrules or similar
       return join(projectRoot, '.cursorrules');
     case 'aider':
-      // Aider uses .aider.md
       return join(projectRoot, '.aider.md');
     default:
-      // Fallback to generic AGENTS.md
       return join(projectRoot, 'AGENTS.md');
   }
 }
 
 /**
- * Inject or update the skill prompt block in the agent's config file
+ * Inject or update the skill prompt block in the agent's config file.
+ * Reads installed skills dynamically so triggers are always up to date.
  */
-export async function injectSkillPrompt(projectRoot: string, agent: string): Promise<void> {
+export async function injectSkillPrompt(
+  projectRoot: string,
+  agent: string,
+  preloadedSkills?: InstalledSkill[]
+): Promise<void> {
   const promptPath = getPromptFilePath(projectRoot, agent);
-  const skillPrompt = generateSkillPrompt();
+  const skillsDir = getInstalledSkillsDir(projectRoot, agent);
+
+  // Use preloaded skills (passed from installSkills after fresh install) or read from disk
+  const skills = preloadedSkills ?? (await readInstalledSkills(skillsDir));
+
+  // Compute the relative path for skill references in the prompt
+  const agentDir = agent === 'claude-code' ? '.claude' : '.agents';
+  const relativeSkillsDir = `${agentDir}/skills`;
+
+  const skillPrompt = generateSkillPrompt(skills, relativeSkillsDir);
 
   let content: string;
 
   if (existsSync(promptPath)) {
-    // File exists - read and check for existing block
     content = await readFile(promptPath, 'utf-8');
 
     const startIdx = content.indexOf(START_MARKER);
     const endIdx = content.indexOf(END_MARKER);
 
     if (startIdx !== -1 && endIdx !== -1) {
-      // Block exists - replace it
+      // Block exists — replace it
       const before = content.substring(0, startIdx);
       const after = content.substring(endIdx + END_MARKER.length);
       content = before + skillPrompt + after;
     } else {
-      // No block - append to end
+      // No block — append
       content = content.trimEnd() + '\n\n' + skillPrompt + '\n';
     }
   } else {
-    // File doesn't exist - create with header based on agent
-    const header = agent === 'claude-code' 
-      ? '# CLAUDE.md\n\nProject-specific instructions for Claude Code.\n\n'
-      : '# Agent Instructions\n\nProject-specific instructions for AI coding agents.\n\n';
-    
+    const header =
+      agent === 'claude-code'
+        ? '# CLAUDE.md\n\nProject-specific instructions for Claude Code.\n\n'
+        : '# Agent Instructions\n\nProject-specific instructions for AI coding agents.\n\n';
+
     content = header + skillPrompt + '\n';
   }
 
   await writeFile(promptPath, content, 'utf-8');
   console.log(`✅ Updated skill prompt in ${promptPath}`);
+  if (skills.length > 0) {
+    console.log(
+      `   ${skills.length} skill(s) with auto-trigger rules: ${skills.map((s) => s.name).join(', ')}`
+    );
+  }
 }

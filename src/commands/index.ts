@@ -3,7 +3,7 @@ import { join } from 'path';
 import { parse as parseYaml } from 'yaml';
 import { AgentType, getAgentSkillsDir } from '../detectors';
 import { getAdapter, UniversalSkill } from '../adapters';
-import { injectSkillPrompt } from '../injectors';
+import { injectSkillPrompt, InstalledSkill } from '../injectors';
 
 /**
  * Get the skills directory (where universal skills are stored)
@@ -121,7 +121,9 @@ export async function installSkills(
     skillsToInstall = validSkills.filter((skill): skill is string => skill !== null);
   }
 
-  // Install each skill
+  // Install each skill, collecting metadata for prompt injection
+  const installedSkills: InstalledSkill[] = [];
+
   for (const skillName of skillsToInstall) {
     try {
       const skill = await loadSkill(skillName);
@@ -129,6 +131,13 @@ export async function installSkills(
       
       console.log(`📝 Installing: ${skill.name} v${skill.version}`);
       await adapter.convert(skill, targetDir);
+
+      // Collect for prompt injection (extract trigger patterns from metadata)
+      installedSkills.push({
+        name: skill.name,
+        description: skill.description,
+        triggers: Array.isArray(skill.metadata.triggers) ? skill.metadata.triggers : [],
+      });
     } catch (error) {
       console.error(`❌ Failed to install ${skillName}:`, error);
     }
@@ -140,9 +149,10 @@ export async function installSkills(
   if (!global && agent) {
     console.log('💡 Skills are project-specific and will be versioned with your repo');
     
-    // Inject skill prompt into agent config file for local installations
+    // Inject skill prompt into agent config file for local installations.
+    // Pass preloaded skills so injection doesn't need to re-read from disk.
     try {
-      await injectSkillPrompt(process.cwd(), agent);
+      await injectSkillPrompt(process.cwd(), agent, installedSkills);
     } catch (error) {
       console.warn('⚠️  Failed to update agent config file:', error);
       console.warn('   Skills are installed but you may need to manually document them.');

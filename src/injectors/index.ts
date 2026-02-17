@@ -117,6 +117,16 @@ ${triggerSection || '_(no triggers defined — invoke manually)_'}
 
 ⚡ **MANDATORY BEHAVIOR**: When you detect ANY trigger below, you MUST automatically invoke the corresponding skill — do NOT wait for the user to ask. This is not optional.
 
+### The Loop
+
+    consult-knowledge → plan → implement → record-architectural-decision
+                                         → extract-pattern
+                                         → surface-gap
+                                         → update-skill
+                            (repeat: next task starts with consult-knowledge)
+
+Every task starts with retrieval. Every task ends with capture. That's the loop.
+
 ### ⚠️ Silent Decisions
 
 **You make architectural decisions even when you don't say "I'm choosing between X and Y."**
@@ -133,6 +143,13 @@ ${skillBlocks}
 ### Workflow Checkpoints
 
 Run these internal checks at each stage — no user prompt needed:
+
+**Before planning (first thing, always):**
+- Run \`consult-knowledge\`: scan \`docs/decisions/\`, \`docs/patterns/\`, \`.agent-evolver/knowledge-gaps.md\`
+- Find anything related to the current task's keywords and let it shape the plan
+- If a prior decision applies → follow it (or explicitly revisit it)
+- If a prior pattern applies → use it without being asked
+- If a blocking gap applies → surface it before writing code
 
 **Before writing code:**
 - Am I choosing between approaches? → \`record-architectural-decision\`

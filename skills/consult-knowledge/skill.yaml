@@ -1,0 +1,31 @@
+name: consult-knowledge
+version: 1.0.0
+description: Search existing decisions, patterns, and knowledge gaps before planning or implementing anything
+author: adhd8k
+agentCompatibility:
+  - claude-code
+  - cursor
+  - aider
+  - openclaw
+triggers:
+  # Phrase-based: user says these things
+  - pattern: "let's implement"
+  - pattern: "can you add"
+  - pattern: "build a"
+  - pattern: "how should we"
+  # Action-based: Claude is about to do these things
+  - action: "Starting any non-trivial implementation or feature"
+  - action: "Making a plan before writing code"
+  - action: "Approaching a problem that touches an existing system or subsystem"
+  - action: "Beginning work on any task that is not purely mechanical"
+completion_check: "Did I search existing decisions and patterns before starting?"
+variables:
+  decisionsDir: "{{projectRoot}}/docs/decisions"
+  patternsDir: "{{projectRoot}}/docs/patterns"
+  gapsLog: "{{projectRoot}}/.agent-evolver/knowledge-gaps.md"
+  template: "templates/context-summary.md"
+files:
+  - path: "SKILL.md"
+    type: "instructions"
+  - path: "templates/context-summary.md"
+    type: "template"

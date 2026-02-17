@@ -1,6 +1,6 @@
 {
   "name": "@adhd8k/agent-evolver",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Self-evolving agentic coding system - agents that learn project patterns and update their own skills",
   "main": "dist/index.js",
   "bin": {

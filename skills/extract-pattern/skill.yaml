@@ -1,5 +1,5 @@
 name: extract-pattern
-version: 1.0.0
+version: 1.1.0
 description: Identify recurring patterns in code, problems, or solutions and document them for reuse
 author: adhd8k
 agentCompatibility:
@@ -8,10 +8,17 @@ agentCompatibility:
   - aider
   - openclaw
 triggers:
+  # Phrase-based: user says these things
   - pattern: "I've done this before"
   - pattern: "similar to how we"
   - pattern: "same pattern as"
   - pattern: "recurring issue"
+  # Action-based: Claude is doing these things (even silently)
+  - action: "Writing logic that mirrors existing code elsewhere in the project"
+  - action: "Creating a utility or helper that abstracts repeated boilerplate"
+  - action: "Solving a problem in the same way it was solved before"
+  - action: "Implementing a second instance of a component, hook, or module type"
+completion_check: "Is there a reusable pattern here?"
 variables:
   patternsDir: "{{projectRoot}}/docs/patterns"
   template: "templates/pattern.md"

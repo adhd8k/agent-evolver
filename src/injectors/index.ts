@@ -7,13 +7,17 @@ const START_MARKER = '###AGENT-EVOLVER-START###';
 const END_MARKER = '###AGENT-EVOLVER-END###';
 
 export interface SkillTrigger {
-  pattern: string;
+  /** Phrase-based: fired when user says this */
+  pattern?: string;
+  /** Action-based: fired when Claude is silently doing this */
+  action?: string;
 }
 
 export interface InstalledSkill {
   name: string;
   description: string;
   triggers: SkillTrigger[];
+  completionCheck?: string;
 }
 
 /**
@@ -49,6 +53,7 @@ async function readInstalledSkills(skillsDir: string): Promise<InstalledSkill[]>
           name: metadata.name || entry,
           description: metadata.description || '',
           triggers: Array.isArray(metadata.triggers) ? metadata.triggers : [],
+          completionCheck: metadata.completion_check ?? undefined,
         });
       } catch {
         // Skip malformed skill.yaml files
@@ -71,27 +76,53 @@ function generateSkillPrompt(skills: InstalledSkill[], agentSkillsDir: string): 
       ? '_No skills installed yet. Run `agent-evolver install` to add skills._'
       : skills
           .map((skill) => {
-            const triggerLines =
-              skill.triggers.length > 0
-                ? skill.triggers.map((t) => `  - "${t.pattern}"`).join('\n')
-                : '  - _(no triggers defined — invoke manually)_';
+            const phraseLines = skill.triggers
+              .filter((t) => t.pattern)
+              .map((t) => `  - "${t.pattern}"`)
+              .join('\n');
+
+            const actionLines = skill.triggers
+              .filter((t) => t.action)
+              .map((t) => `  - ${t.action}`)
+              .join('\n');
+
+            const triggerSection = [
+              phraseLines
+                ? `**Phrase triggers** (user or Claude says):\n${phraseLines}`
+                : null,
+              actionLines
+                ? `**Action triggers** (Claude is silently doing this):\n${actionLines}`
+                : null,
+            ]
+              .filter(Boolean)
+              .join('\n\n');
 
             return `#### \`${skill.name}\`
 > ${skill.description}
 
-**Auto-trigger when you detect ANY of:**
-${triggerLines}
+${triggerSection || '_(no triggers defined — invoke manually)_'}
 
 **How to invoke:** Read \`${agentSkillsDir}/${skill.name}/SKILL.md\` and follow its instructions immediately.`;
           })
           .join('\n\n---\n\n');
 
+  // Build checklist items per skill (for completion checklist)
+  const checklistItems = skills
+    .filter((s) => s.completionCheck)
+    .map((s) => `- [ ] ${s.completionCheck} → \`${s.name}\``)
+    .join('\n') || '- [ ] _(no skills with completion checks installed)_';
+
   return `${START_MARKER}
 ## Agent Evolver — Skill Auto-Trigger Rules
 
-⚡ **MANDATORY BEHAVIOR**: When you detect ANY trigger pattern listed below, you MUST automatically invoke the corresponding skill — do NOT wait for the user to ask.
+⚡ **MANDATORY BEHAVIOR**: When you detect ANY trigger below, you MUST automatically invoke the corresponding skill — do NOT wait for the user to ask. This is not optional.
 
-This is not optional. These skills exist to capture knowledge, prevent repeated mistakes, and improve over time. Invoke them proactively.
+### ⚠️ Silent Decisions
+
+**You make architectural decisions even when you don't say "I'm choosing between X and Y."**
+If you wrote code one way when another way was possible, that's a decision. Record it.
+Phrase-based triggers assume you'll narrate your thinking. You often just do without narrating.
+**The action-based triggers below exist specifically for this.** Check them even when silent.
 
 ---
 
@@ -99,19 +130,38 @@ ${skillBlocks}
 
 ---
 
-### General Rules
+### Workflow Checkpoints
 
-- **Architectural decisions**: ANY time you choose between approaches, record it — even if the user didn't ask
-- **Recurring patterns**: After solving a problem the 2nd time, extract the pattern
-- **Uncertainty**: When you're about to guess or you lack guidance, surface the gap first
-- **Mistakes**: When you catch a mistake, update the relevant skill with the lesson
+Run these internal checks at each stage — no user prompt needed:
+
+**Before writing code:**
+- Am I choosing between approaches? → \`record-architectural-decision\`
+- Am I implementing something with no prior example in this codebase? → \`surface-gap\`
+
+**After implementing a feature:**
+- Could this pattern appear again in this project? → \`extract-pattern\`
+- Did I learn something non-obvious? Did a skill mislead me? → \`update-skill\`
+- Did I make any design choices, even silently? → \`record-architectural-decision\`
+
+---
+
+### Feature Completion Checklist
+
+**A feature is NOT complete until you've answered these:**
+
+${checklistItems}
+
+If the answer to any is "yes" — invoke the skill before marking the task done.
+If the answer is "no" or "not applicable" — note why briefly and move on.
+
+---
 
 ### Updating Skills
 
-Skills improve over time. If a skill's instructions are incomplete or wrong for this project, use the \`update-skill\` skill to fix it. Skills are living documents — your edits are encouraged.
+Skills are living documents. If a skill's guidance is wrong, incomplete, or doesn't fit this project — fix it using \`update-skill\`. Your edits are encouraged.
 
 ---
-*This section is managed by agent-evolver. Re-running \`agent-evolver install\` updates this block.*
+*Managed by agent-evolver. Re-running \`agent-evolver install\` updates this block.*
 ${END_MARKER}`;
 }
 

@@ -132,11 +132,12 @@ export async function installSkills(
       console.log(`📝 Installing: ${skill.name} v${skill.version}`);
       await adapter.convert(skill, targetDir);
 
-      // Collect for prompt injection (extract trigger patterns from metadata)
+      // Collect for prompt injection (extract trigger patterns and completion check from metadata)
       installedSkills.push({
         name: skill.name,
         description: skill.description,
         triggers: Array.isArray(skill.metadata.triggers) ? skill.metadata.triggers : [],
+        completionCheck: skill.metadata.completion_check ?? undefined,
       });
     } catch (error) {
       console.error(`❌ Failed to install ${skillName}:`, error);

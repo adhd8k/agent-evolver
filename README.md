@@ -26,16 +26,51 @@ That's it. Agent Evolver detects your coding agent (Claude Code, Cursor, Aider) 
 
 ## What Gets Installed
 
-Four skills your agent can use automatically:
+Five skills your agent can use automatically:
 
 | Skill | What it does |
 |-------|-------------|
+| `consult-knowledge` | Looks up past decisions and patterns before acting |
 | `record-architectural-decision` | Captures why you made a decision, not just what you decided |
 | `extract-pattern` | Recognizes when something has been done 3+ times and codifies it |
 | `update-skill` | Lets the agent improve its own instructions based on what it learns |
-| `consult-knowledge` | Looks up past decisions and patterns before acting |
+| `autonomy-preferences` | Learns when to ask you vs. decide autonomously |
 
 Skills are installed locally to your project (`.claude/skills/` for Claude Code) and tracked in git — so your whole team benefits.
+
+---
+
+## Autonomy Preferences
+
+Tired of your agent asking permission for everything? Or worried it's making decisions without you?
+
+The `autonomy-preferences` skill lets you configure how autonomous your agent should be. On first use, it asks:
+
+> **How autonomous should I be when making decisions?**
+> - **Ask me first** — I want to approve architectural, design, and technical decisions
+> - **Suggest then proceed** — Show me what you're thinking, but don't wait for approval
+> - **Fully autonomous** — Make reasonable decisions, I'll correct you if needed
+> - **Let me customize** — Set different levels per category
+
+### Decision Categories
+
+| Category | Examples |
+|----------|----------|
+| **Architectural** | Database schema, service boundaries, API architecture |
+| **Design** | API design, type definitions, module organization |
+| **Technical** | Framework selection, algorithms, performance trade-offs |
+| **UI/UX** | Layout, styling, interactions, accessibility |
+| **Process** | Branching strategy, commit conventions, release decisions |
+
+### Modes
+
+| Mode | Behavior |
+|------|----------|
+| `ask` | Agent asks for approval before proceeding |
+| `suggest-then-proceed` | Agent states its decision and continues without waiting |
+| `autonomous` | Agent decides without asking; you correct if needed |
+
+Preferences are stored in `.agent-evolver/autonomy-preferences.yaml` and persist across sessions.
 
 ---
 

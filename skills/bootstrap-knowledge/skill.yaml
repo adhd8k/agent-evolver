@@ -1,0 +1,30 @@
+name: bootstrap-knowledge
+version: 0.1.0
+description: Initialize decisions and patterns knowledge base for an existing (brownfield) codebase
+author: adhd8k
+agentCompatibility:
+  - claude-code
+  - cursor
+  - aider
+  - openclaw
+triggers:
+  # Phrase-based: user says these things
+  - pattern: "bootstrap knowledge"
+  - pattern: "initialize decisions"
+  - pattern: "analyze codebase"
+  - pattern: "extract existing patterns"
+  - pattern: "document existing architecture"
+  - pattern: "brownfield setup"
+  # Action-based: agent detects these conditions
+  - action: "Starting work on an existing codebase with no docs/decisions directory"
+  - action: "No prior architectural decisions found but codebase has significant structure"
+completion_check: "Did I bootstrap knowledge for this existing codebase?"
+variables:
+  decisionsDir: "{{projectRoot}}/docs/decisions"
+  patternsDir: "{{projectRoot}}/docs/patterns"
+  outputSummary: "{{projectRoot}}/.agent-evolver/bootstrap-summary.md"
+files:
+  - path: "SKILL.md"
+    type: "instructions"
+  - path: "templates/bootstrap-checklist.md"
+    type: "template"

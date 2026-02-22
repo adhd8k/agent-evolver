@@ -9,6 +9,9 @@ Recognize recurring patterns in code, problems, or solutions and capture them in
 - Applying the same solution strategy repeatedly
 - Finding bugs that follow a pattern
 - Implementing features with similar architecture
+- Finding code that diverges from documented conventions
+- Noticing tool or framework-specific syntax/config worth remembering
+- Performing a multi-step sequence (3+) that forms a repeatable workflow
 
 ## Recognition Triggers
 Look for phrases like:
@@ -30,6 +33,8 @@ Look for phrases like:
    - **Problem Pattern:** Recurring bug, edge case, failure mode
    - **Solution Pattern:** Debugging approach, fix strategy, workaround
    - **Workflow Pattern:** Development process, testing approach, deployment strategy
+   - **Convention Divergence:** Code that breaks from documented conventions — use `{{conventionTemplate}}`
+   - **Tool Pattern:** Tool/framework-specific syntax, config, or gotchas — use `{{toolTemplate}}`
 
 3. **Document the Pattern**
    - Clear name (should be immediately recognizable)
@@ -39,13 +44,18 @@ Look for phrases like:
    - Variations: when/how the pattern adapts
    - Anti-patterns: what to avoid
 
-4. **Create Pattern File**
+4. **Decide Scope**
+   - **Local rule** → Add to project's CLAUDE.md or a project-specific skill overlay if the pattern only applies to this project
+   - **Repository pattern** → Write to `{{patternsDir}}/` if the pattern is reusable across projects
+   - Ask: "Is this specific to this codebase, or would any project using this stack benefit?"
+
+5. **Create Pattern File**
    - Location: `{{patternsDir}}/[category]/[pattern-name].md`
-   - Use template structure
+   - Use template structure (see templates: `{{template}}`, `{{conventionTemplate}}`, `{{toolTemplate}}`)
    - Link to real code examples
    - Include before/after if refactoring
 
-5. **Update Pattern Index**
+6. **Update Pattern Index**
    - Add to `{{patternsDir}}/INDEX.md`
    - Cross-reference related patterns
    - Tag with relevant domains
@@ -58,6 +68,9 @@ Look for phrases like:
 - `performance/` - Optimization patterns
 - `security/` - Security patterns
 - `data/` - Data modeling patterns
+- `conventions/` - Convention divergences and local rules
+- `tooling/` - Tool/framework-specific patterns and gotchas
+- `workflows/` - Multi-step repeatable workflows
 
 ## Template Structure
 

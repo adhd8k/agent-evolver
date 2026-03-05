@@ -40,6 +40,15 @@ Identify missing knowledge, unclear instructions, or situations where existing s
 - Multiple approaches seem equally valid
 - About to guess or make assumptions
 
+### 5. extract-session-insight
+Capture session-level learning signals — discovery friction, user corrections, and domain knowledge — that emerge from how work happens, not just what code looks like.
+
+**Use when:**
+- You had to search multiple places to find something
+- The user corrected your approach or redirected the task
+- You learned domain-specific information not obvious from the code
+- Something was harder to find or do than it should have been
+
 ## Universal Skill Format
 
 Each skill directory contains:

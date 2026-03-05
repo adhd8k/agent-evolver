@@ -1,0 +1,36 @@
+name: extract-session-insight
+version: 1.0.0
+description: Capture session-level learning signals — discovery friction, user corrections, and domain knowledge — that emerge from how work happens, not just what code looks like
+author: adhd8k
+agentCompatibility:
+  - claude-code
+  - cursor
+  - aider
+  - openclaw
+triggers:
+  # Action-based: reflect on how the session went
+  - action: "Had to search 3+ locations to find something"
+  - action: "User corrected approach or redirected the task"
+  - action: "Learned domain information not obvious from the code"
+  # Phrase-based: user says these things
+  - pattern: "I had to look everywhere"
+  - pattern: "that's not how we do it"
+  - pattern: "you should know that"
+  - pattern: "no, do it this way"
+  - pattern: "we always"
+  - pattern: "never do that"
+completion_check: "Did I encounter friction, receive a correction, or learn domain knowledge this session?"
+variables:
+  insightsDir: "{{projectRoot}}/docs/insights"
+  frictionTemplate: "templates/friction-log.md"
+  correctionTemplate: "templates/correction-record.md"
+  domainTemplate: "templates/domain-fact.md"
+files:
+  - path: "SKILL.md"
+    type: "instructions"
+  - path: "templates/friction-log.md"
+    type: "template"
+  - path: "templates/correction-record.md"
+    type: "template"
+  - path: "templates/domain-fact.md"
+    type: "template"
